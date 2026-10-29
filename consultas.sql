@@ -24,19 +24,63 @@ FROM language
 GROUP BY (language.language_id);
 
 -- 4:  Muestra el promedio de duración (length) de las películas por idioma y filtra aquellos idiomas con duración media estrictamente mayor a 110 minutos.
-SELECT AVG(length), AS duracion, language_id
-FROM film
-     JOIN language USING (language_id)
+SELECT language_id, name, AVG(length) AS duracion_media
+FROM language
+     JOIN film USING (language_id)
 GROUP BY language_id
-HAVING (length) > 110;
+HAVING  AVG(length) > 110;
+
 -- 5:  Para cada película, muestra cuántas copias hay en el inventario.
+SELECT title, count(inventory.film_id) AS numero_de_copias
+FROM film
+     JOIN inventory USING (film_id)
+GROUP BY title;
+
 -- 6:  Lista solo las películas que tienen al menos 5 copias en inventario.
+SELECT title, count(inventory.film_id) AS numero_de_copias
+FROM film
+     JOIN inventory USING (film_id)
+GROUP BY title
+HAVING count(inventory.film_id) > 5;
+
 -- 7:  Para cada artículo de inventario, cuenta cuántos alquileres se han realizado.
+SELECT inventory_id AS artículo, COUNT(rental_id) AS alquileres_realizados
+FROM inventory
+     JOIN rental USING (inventory_id)
+GROUP BY inventory_id;
+
 -- 8:  Para cada cliente, muestra cuántos alquileres ha realizado en total.
+SELECT customer_id, CONCAT(first_name, ' ' , last_name), COUNT(rental_id)
+FROM customer
+     JOIN rental USING (customer_id)
+GROUP BY customer_id;
+
 -- 9:  Lista los clientes con 30 o más alquileres acumulados.
+SELECT customer_id, CONCAT(first_name, ' ' , last_name), COUNT(rental_id)
+FROM customer
+     JOIN rental USING (customer_id)
+GROUP BY customer_id
+HAVING COUNT(rental_id) > 30;
+
 -- 10:  Para cada cliente, muestra el total de pagos (suma en euros/dólares) que ha realizado.
+SELECT customer_id, CONCAT(first_name, ' ' , last_name), SUM(amount) AS pagos
+FROM customer
+     JOIN payment USING (customer_id)
+GROUP BY customer_id;
+
 -- 11:  Muestra los clientes cuyo importe total pagado es al menos 200.
+SELECT customer_id, CONCAT(first_name, ' ' , last_name), SUM(amount) AS pagos
+FROM customer
+     JOIN payment USING (customer_id)
+GROUP BY customer_id
+HAVING SUM(amount) > 200;
+
 -- 12:  Para cada empleado (staff), muestra el número de pagos que ha procesado.
+SELECT staff_id, SUM(rental_id)
+FROM staff
+     JOIN payment USING (staff_id)
+GROUP BY staff_id;
+
 -- 13:  Para cada empleado, muestra el importe total procesado.
 -- 14:  Para cada tienda, cuenta cuántos artículos de inventario tiene.
 -- 15:  Para cada tienda, cuenta cuántos clientes tiene asignados.
