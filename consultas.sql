@@ -76,39 +76,176 @@ GROUP BY customer_id
 HAVING SUM(amount) > 200;
 
 -- 12:  Para cada empleado (staff), muestra el número de pagos que ha procesado.
-SELECT staff_id, SUM(rental_id)
+SELECT staff_id, CONCAT(first_name, ' ' , last_name) AS nombre, COUNT(rental_id)
 FROM staff
      JOIN payment USING (staff_id)
 GROUP BY staff_id;
 
 -- 13:  Para cada empleado, muestra el importe total procesado.
+SELECT staff_id, CONCAT(first_name, ' ' , last_name) AS nombre, SUM(amount)
+FROM staff
+     JOIN payment USING (staff_id)
+GROUP BY staff_id;
+
 -- 14:  Para cada tienda, cuenta cuántos artículos de inventario tiene.
+SELECT store_id, COUNT(inventory_id)
+FROM store
+	 JOIN inventory USING (store_id)
+GROUP BY store_id;
+
 -- 15:  Para cada tienda, cuenta cuántos clientes tiene asignados.
+SELECT store_id, COUNT(customer_id)
+FROM store
+	 JOIN customer USING (store_id)
+GROUP BY store_id;
+
 -- 16:  Para cada tienda, cuenta cuántos empleados (staff) tiene asignados.
+SELECT store_id, COUNT(staff_id)
+FROM store
+	 JOIN staff USING (store_id)
+GROUP BY store_id;
+
 -- 17:  Para cada dirección (address), cuenta cuántas tiendas hay ubicadas ahí (debería ser 0/1 en datos estándar).
+SELECT address_id, address, COUNT(store_id)
+FROM address
+     JOIN store USING (address_id)
+GROUP BY address_id;
+
 -- 18:  Para cada dirección, cuenta cuántos empleados residen en esa dirección.
+SELECT address_id, address, COUNT(staff_id)
+FROM address
+     JOIN staff USING (address_id)
+GROUP BY address_id;
+
 -- 19:  Para cada dirección, cuenta cuántos clientes residen ahí.
+SELECT address_id, address, COUNT(customer_id)
+FROM address
+     JOIN customer USING (address_id)
+GROUP BY address_id;
+
 -- 20:  Para cada ciudad, cuenta cuántas direcciones hay registradas.
+SELECT city_id, city, COUNT(address_id)
+FROM city
+     JOIN address USING (city_id)
+GROUP BY city_id;
+
 -- 21:  Para cada país, cuenta cuántas ciudades existen.
+SELECT country_id, country, COUNT(city_id)
+FROM country
+     JOIN city USING (country_id)
+GROUP BY country_id;
+
 -- 22:  Para cada idioma, calcula la duración media de películas y muestra solo los idiomas con media entre 90 y 120 inclusive.
+SELECT language_id, name, AVG(length)
+FROM language
+     JOIN film USING (language_id)
+GROUP BY language_id
+HAVING AVG(length) >= 90 AND AVG(length) <= 120;
+     
 -- 23:  Para cada película, cuenta el número de alquileres que se han hecho de cualquiera de sus copias (usando inventario).
+SELECT inventory.film_id, COUNT(rental_id)
+FROM inventory
+     JOIN rental USING (inventory_id)
+GROUP BY inventory.film_id;
+
 -- 24:  Para cada cliente, cuenta cuántos pagos ha realizado en 2005 (usando el año de payment_date).
+SELECT customer_id, CONCAT(first_name, ' ' , last_name), COUNT(payment_date)
+FROM customer
+     JOIN payment USING (customer_id)
+WHERE YEAR(payment_date) = 2005
+GROUP BY customer_id;
+
 -- 25:  Para cada película, muestra el promedio de tarifa de alquiler (rental_rate) de las copias existentes (es un promedio redundante pero válido).
+SELECT film_id, title, AVG(rental_rate)
+FROM inventory
+     JOIN film USING (film_id)
+GROUP BY film_id;
+
 -- 26:  Para cada actor, muestra la duración media (length) de sus películas.
+SELECT actor_id, AVG(length)
+FROM film_actor
+     JOIN film USING (film_id)
+GROUP BY actor_id;
+
 -- 27:  Para cada ciudad, cuenta cuántos clientes hay (usando la relación cliente->address->city requiere 3 tablas; aquí contamos direcciones por ciudad).
+SELECT city_id, city, COUNT(customer_id)
+FROM city
+     JOIN address USING (city_id)
+     JOIN customer USING (address_id)
+GROUP BY city_id;
+
 -- 28:  Para cada película, cuenta cuántos actores tiene asociados.
+SELECT film_id, title, COUNT(actor_id)
+FROM film
+     JOIN film_actor USING (film_id)
+GROUP BY film_id;
+
 -- 29:  Para cada categoría (por id), cuenta cuántas películas pertenecen a ella (sin nombre de categoría para mantener 2 tablas).
+SELECT category_id, COUNT(film_id)
+FROM film_category
+GROUP BY category_id;
+
 -- 30:  Para cada tienda, cuenta cuántos alquileres totales se originan en su inventario.
+SELECT store_id, COUNT(rental_id)
+FROM inventory
+     JOIN rental USING (inventory_id)
+GROUP BY store_id;
+
 -- ==============================================
 -- SECCIÓN B) 30 CONSULTAS CON JOIN DE 3 TABLAS
 -- ==============================================
 -- 31:  Para cada actor, cuenta cuántas películas tiene y muestra solo los que superan 15 películas.
+SELECT actor_id, CONCAT(first_name, ' ' , last_name), COUNT(film_id)
+FROM actor
+     JOIN film_actor USING (actor_id)
+     JOIN film USING (film_id)
+GROUP BY actor_id
+HAVING COUNT(film_id) > 15;
+
 -- 32:  Para cada categoría (por nombre), cuenta cuántas películas hay en esa categoría.
+SELECT name, COUNT(film_id)
+FROM category
+     JOIN film_category USING (category_id)
+     JOIN film USING (film_id)
+GROUP BY name;
+
 -- 33:  Para cada película, cuenta cuántos alquileres se han hecho de sus copias.
+SELECT film_id, title, COUNT(rental_id)
+FROM film
+     JOIN inventory USING (film_id)
+     JOIN rental USING (inventory_id)
+GROUP BY film_id;
+
 -- 34:  Para cada cliente, suma el importe pagado en 2005 y filtra clientes con total >= 150.
+SELECT customer.customer_id, CONCAT(first_name, ' ' , last_name), SUM(amount)
+FROM customer
+     JOIN rental USING (customer_id)
+     JOIN payment USING (rental_id)
+WHERE YEAR(rental_date) = 2005
+GROUP BY customer.customer_id
+HAVING SUM(amount) >= 150;
+
 -- 35:  Para cada tienda, suma el importe cobrado por todos sus empleados.
+SELECT store_id, SUM(amount)
+FROM store
+     JOIN staff USING (store_id)
+     JOIN payment USING (staff_id)
+GROUP BY store_id;
+
 -- 36:  Para cada ciudad, cuenta cuántos empleados residen ahí (staff -> address -> city).
+SELECT city_id, city, COUNT(staff_id)
+FROM city
+     JOIN address USING (city_id)
+     JOIN staff USING (address_id)
+GROUP BY city_id;
+
 -- 37:  Para cada ciudad, cuenta cuántas tiendas existen (store -> address -> city).
+SELECT city_id, city, COUNT(store_id)
+FROM store
+     JOIN address USING (store_id)
+     JOIN city USING (city_id)
+GROUP BY city_id;
+
 -- 38:  Para cada actor, calcula la duración media de sus películas del año 2006.
 -- 39:  Para cada categoría, calcula la duración media y muestra solo las que superan 120.
 -- 40:  Para cada idioma, suma las tarifas de alquiler (rental_rate) de todas sus películas.
