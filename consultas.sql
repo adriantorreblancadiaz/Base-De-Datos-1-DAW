@@ -242,25 +242,118 @@ GROUP BY city_id;
 -- 37:  Para cada ciudad, cuenta cuántas tiendas existen (store -> address -> city).
 SELECT city_id, city, COUNT(store_id)
 FROM store
-     JOIN address USING (store_id)
+     JOIN address USING (address_id)
      JOIN city USING (city_id)
 GROUP BY city_id;
 
 -- 38:  Para cada actor, calcula la duración media de sus películas del año 2006.
+SELECT actor_id, CONCAT(first_name, ' ' , last_name), AVG(length)
+FROM actor
+     JOIN film_actor USING (actor_id)
+     JOIN film USING (film_id)
+WHERE release_year = 2006
+GROUP BY actor_id;
+
 -- 39:  Para cada categoría, calcula la duración media y muestra solo las que superan 120.
+SELECT category_id, name, AVG(length)
+FROM category
+     JOIN film_category USING (category_id)
+     JOIN film USING (film_id)
+GROUP BY category_id
+HAVING AVG(length) > 120;
+
 -- 40:  Para cada idioma, suma las tarifas de alquiler (rental_rate) de todas sus películas.
+SELECT language_id, name, SUM(rental_rate)
+FROM language
+     JOIN film USING (language_id)
+GROUP BY language_id;
+
+SELECT SUM(rental_rate) FROM film;
+
 -- 41:  Para cada cliente, cuenta cuántos alquileres realizó en fines de semana (SÁB-DO) usando DAYOFWEEK (1=Domingo).
+SELECT customer_id, CONCAT(first_name, ' ' , last_name), COUNT(rental_id)
+FROM customer
+     JOIN rental USING (customer_id)
+WHERE DAYOFWEEK(rental_date) = 1 or DAYOFWEEK(rental_date) = 7
+GROUP BY customer_id;
+
 -- 42:  Para cada actor, muestra el total de títulos distintos en los que participa (equivale a COUNT DISTINCT, sin subconsulta).
+SELECT actor_id, CONCAT(first_name, ' ' , last_name), COUNT(DISTINCT title)
+FROM actor
+     JOIN film_actor USING (actor_id)
+     JOIN film USING (film_id)
+GROUP BY actor
+_id;
 -- 43:  Para cada ciudad, cuenta cuántos clientes residen ahí (customer -> address -> city).
+SELECT city_id, city, COUNT(customer_id)
+FROM customer
+     JOIN address USING (address_id)
+     JOIN city USING (city_id)
+GROUP BY city_id;
+
 -- 44:  Para cada categoría, muestra cuántos actores distintos participan en películas de esa categoría.
+SELECT category_id, name, COUNT(DISTINCT actor_id)
+FROM category
+     JOIN film_category USING (category_id)
+     JOIN film USING (film_id)
+     JOIN film_actor USING (film_id)
+GROUP BY category_id;
+
 -- 45:  Para cada tienda, cuenta cuántas copias totales (inventario) tiene de películas en 2006.
+SELECT store_id, COUNT(inventory_id)
+FROM inventory
+     JOIN film USING (film_id)
+WHERE release_year = 2006
+GROUP BY store_id;
+
 -- 46:  Para cada cliente, suma el total pagado por alquileres cuyo empleado pertenece a la tienda 1.
+SELECT customer_id, CONCAT(customer.first_name, ' ' , customer.last_name), SUM(amount)
+FROM customer
+     JOIN payment USING (customer_id)
+     JOIN staff USING (staff_id)
+WHERE staff.store_id = 1
+GROUP BY customer_id;
+
 -- 47:  Para cada película, cuenta cuántos actores tienen el apellido de longitud >= 5.
+SELECT film_id, title, COUNT(actor_id)
+FROM film 
+     JOIN film_actor USING (film_id)
+     JOIN actor USING (actor_id)
+WHERE CHAR_LENGTH(last_name) >= 5
+GROUP BY film_id;
+
 -- 48:  Para cada categoría, suma la duración total (length) de sus películas.
+SELECT category_id, name, SUM(length)
+FROM category
+     JOIN film_category USING (category_id)
+     JOIN film USING (film_id)
+GROUP BY category_id;
+
 -- 49:  Para cada ciudad, suma los importes pagados por clientes que residen en esa ciudad.
+SELECT city_id, city, SUM(amount)
+FROM city
+     JOIN address USING (city_id)
+     JOIN customer USING (address_id)
+     JOIN payment USING (customer_id)
+GROUP BY city_id;
+
 -- 50:  Para cada idioma, cuenta cuántos actores distintos participan en películas de ese idioma.
+SELECT language_id, name, COUNT(DISTINCT actor_id)
+FROM language
+     JOIN film USING (language_id)
+     JOIN film_actor USING (film_id)
+GROUP BY language_id;
+
 -- 51:  Para cada tienda, cuenta cuántos clientes activos (active=1) tiene.
+SELECT store_id, COUNT(customer_id)
+FROM store
+     JOIN customer USING (store_id)
+WHERE customer.active = 1
+GROUP BY store_id;
+
 -- 52:  Para cada cliente, cuenta en cuántas categorías distintas ha alquilado (aprox. vía film_category; requiere 4 tablas, aquí contamos películas 2006 por inventario).
+ 
+
 -- 53:  Para cada empleado, cuenta cuántos clientes diferentes le han pagado.
 -- 54:  Para cada ciudad, cuenta cuántas películas del año 2006 han sido alquiladas por residentes en esa ciudad.
 -- 55:  Para cada categoría, calcula el promedio de replacement_cost de sus películas.
