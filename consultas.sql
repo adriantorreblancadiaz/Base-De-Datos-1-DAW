@@ -355,13 +355,62 @@ GROUP BY store_id;
  
 
 -- 53:  Para cada empleado, cuenta cuántos clientes diferentes le han pagado.
+SELECT staff_id, COUNT(DISTINCT customer_id)
+FROM staff
+     JOIN payment USING (staff_id)
+     JOIN customer USING (customer_id)
+GROUP BY staff_id;
+
 -- 54:  Para cada ciudad, cuenta cuántas películas del año 2006 han sido alquiladas por residentes en esa ciudad.
+SELECT city_id, city;
+
 -- 55:  Para cada categoría, calcula el promedio de replacement_cost de sus películas.
+SELECT category_id, name, AVG(replacement_cost)
+FROM category
+     JOIN film_category USING (category_id)
+     JOIN film USING (film_id)
+GROUP BY category_id;
+
 -- 56:  Para cada tienda, suma los importes cobrados en 2006 (vía empleados de esa tienda).
+SELECT store_id, SUM(amount)
+FROM store
+     JOIN staff USING (store_id)
+     JOIN payment USING (staff_id)
+WHERE YEAR(payment_date) = 2006
+GROUP BY store_id;
+
 -- 57:  Para cada actor, cuenta cuántas películas tienen título de más de 12 caracteres.
+SELECT actor_id, CONCAT(first_name, ' ' , last_name), COUNT(film_id)
+FROM actor
+     JOIN film_actor USING (actor_id)
+     JOIN film USING (film_id)
+WHERE CHAR_LENGTH(title) > 12
+GROUP BY actor_id;
+
 -- 58:  Para cada ciudad, calcula la suma de pagos de 2005 y filtra las ciudades con total >= 300.
+SELECT city_id, SUM(payment_id)
+FROM address
+     JOIN staff USING (address_id)
+     JOIN payment USING (staff_id)
+WHERE SUM(paayment_id) >=f 300
+GROUP BY city_id;
+
 -- 59:  Para cada categoría, cuenta cuántas películas tienen rating 'PG' o 'PG-13'.
+SELECT category_id, name, COUNT(film_id)
+FROM category
+     JOIN film_category USING (category_id)
+     JOIN film USING (film_id)
+WHERE rating = 'PG' OR rating = 'PG-13'
+GROUP BY category_id;
+
 -- 60:  Para cada cliente, calcula el total pagado en pagos procesados por el empleado 2.
+SELECT customer_id, CONCAT(customer.first_name, ' ' , customer.last_name), SUM(amount)
+FROM customer
+     JOIN payment USING (customer_id)
+     JOIN staff USING (staff_id)
+WHERE staff_id = 2
+GROUP BY customer_id;
+
 -- ==============================================
 -- SECCIÓN C) 20 CONSULTAS CON JOIN DE 4 TABLAS
 -- ==============================================
